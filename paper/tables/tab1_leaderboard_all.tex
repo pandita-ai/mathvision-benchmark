@@ -1,0 +1,19 @@
+\begin{table}[t]
+\centering
+\caption{Model performance (all evaluated pairs). Bold = best, underline = second best. Mean $\pm$ 95\% CI.}}
+\label{tab:leaderboard_all}
+\begin{tabular}{l r r r r r r}
+\toprule
+Model & n & Compile & DISTS $\downarrow$ & CLIP Sim $\uparrow$ & Edge IoU $\uparrow$ & Edge F1 $\uparrow$ \\
+\midrule
+DeepSeek V3 & 2772 & 5.1\% & 0.273 {\scriptsize $\pm$0.002} & 0.897 {\scriptsize $\pm$0.002} & 0.078 {\scriptsize $\pm$0.002} & 0.140 {\scriptsize $\pm$0.003} \\
+DeepSeek R1 & 2808 & 62.6\% & 0.278 {\scriptsize $\pm$0.003} & 0.897 {\scriptsize $\pm$0.002} & 0.073 {\scriptsize $\pm$0.002} & 0.132 {\scriptsize $\pm$0.003} \\
+GPT-5.4 & 2628 & \underline{90.0\%} & 0.396 {\scriptsize $\pm$0.005} & 0.839 {\scriptsize $\pm$0.004} & 0.042 {\scriptsize $\pm$0.002} & 0.078 {\scriptsize $\pm$0.003} \\
+GPT-OSS & 2582 & 55.7\% & \underline{0.272 {\scriptsize $\pm$0.003}} & 0.901 {\scriptsize $\pm$0.003} & 0.072 {\scriptsize $\pm$0.002} & 0.129 {\scriptsize $\pm$0.003} \\
+Claude Opus 4.6 & 2690 & 41.5\% & \textbf{0.263 {\scriptsize $\pm$0.003}} & \textbf{0.905 {\scriptsize $\pm$0.002}} & \underline{0.089 {\scriptsize $\pm$0.003}} & \underline{0.158 {\scriptsize $\pm$0.004}} \\
+Gemini 3.1 Pro & 2083 & 68.5\% & 0.272 {\scriptsize $\pm$0.005} & \underline{0.901 {\scriptsize $\pm$0.004}} & \textbf{0.095 {\scriptsize $\pm$0.004}} & \textbf{0.164 {\scriptsize $\pm$0.005}} \\
+Qwen3.5-35B & 2542 & 87.1\% & 0.331 {\scriptsize $\pm$0.005} & 0.872 {\scriptsize $\pm$0.003} & 0.059 {\scriptsize $\pm$0.002} & 0.108 {\scriptsize $\pm$0.003} \\
+Llama 4 Maverick & 2641 & \textbf{90.4\%} & 0.306 {\scriptsize $\pm$0.004} & 0.884 {\scriptsize $\pm$0.003} & 0.060 {\scriptsize $\pm$0.002} & 0.110 {\scriptsize $\pm$0.003} \\
+\bottomrule
+\end{tabular}
+\end{table}

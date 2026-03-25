@@ -1,0 +1,31 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Outputs (large — PNGs, logs)
+outputs/
+outputs-gcp/
+
+# Ground truth images (download from MathVision dataset)
+data/ground_truth/
+
+# Environment
+.env
+*.key
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Claude
+.claude/
+
+# Temp
+/tmp/
+*.tar.gz
