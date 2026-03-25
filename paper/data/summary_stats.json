@@ -93,7 +93,7 @@
     }
   },
   "gpt-oss": {
-    "display_name": "GPT-OSS",
+    "display_name": "GPT-OSS-120B",
     "total_prompts": 930,
     "compiled": 2508,
     "compile_rate": 2.696774193548387,

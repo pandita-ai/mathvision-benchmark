@@ -34,7 +34,7 @@ MODEL_NAMES = {
     "deepseek-v3": "DeepSeek V3",
     "deepseek-r1": "DeepSeek R1",
     "gpt-5.4": "GPT-5.4",
-    "gpt-oss": "GPT-OSS",
+    "gpt-oss": "GPT-OSS-120B",
     "claude-opus-4.6": "Claude Opus 4.6",
     "gemini-3.1-pro": "Gemini 3.1 Pro",
     "qwen3.5-35b": "Qwen3.5-35B",
