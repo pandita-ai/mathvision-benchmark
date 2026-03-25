@@ -2,8 +2,8 @@
   "deepseek-v3": {
     "display_name": "DeepSeek V3",
     "total_prompts": 257,
-    "compiled": 13,
-    "compile_rate": 0.05058365758754864,
+    "compiled": 2676,
+    "compile_rate": 10.412451361867705,
     "evaluated": 2772,
     "dists": {
       "mean": 0.2725290334198898,
@@ -33,8 +33,8 @@
   "deepseek-r1": {
     "display_name": "DeepSeek R1",
     "total_prompts": 530,
-    "compiled": 332,
-    "compile_rate": 0.6264150943396226,
+    "compiled": 2722,
+    "compile_rate": 5.1358490566037736,
     "evaluated": 2808,
     "dists": {
       "mean": 0.2779204734200426,
@@ -95,8 +95,8 @@
   "gpt-oss": {
     "display_name": "GPT-OSS",
     "total_prompts": 930,
-    "compiled": 518,
-    "compile_rate": 0.556989247311828,
+    "compiled": 2508,
+    "compile_rate": 2.696774193548387,
     "evaluated": 2582,
     "dists": {
       "mean": 0.27186789178368104,
@@ -126,8 +126,8 @@
   "claude-opus-4.6": {
     "display_name": "Claude Opus 4.6",
     "total_prompts": 545,
-    "compiled": 226,
-    "compile_rate": 0.41467889908256883,
+    "compiled": 2601,
+    "compile_rate": 4.772477064220183,
     "evaluated": 2690,
     "dists": {
       "mean": 0.2629114272647631,
@@ -157,8 +157,8 @@
   "gemini-3.1-pro": {
     "display_name": "Gemini 3.1 Pro",
     "total_prompts": 2716,
-    "compiled": 1860,
-    "compile_rate": 0.6848306332842415,
+    "compiled": 2064,
+    "compile_rate": 0.759941089837997,
     "evaluated": 2083,
     "dists": {
       "mean": 0.27213666771560463,

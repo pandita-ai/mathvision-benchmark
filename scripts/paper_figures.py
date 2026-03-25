@@ -99,17 +99,52 @@ def load_all_models(outputs_dir):
     return all_data
 
 
+def _infer_dominant_format(gen_log):
+    """Infer the dominant code format from a generation log's format_counts.
+
+    For models with high cache rates, many images have 'unknown' code_language
+    because they were generated in an earlier run. We use the known format
+    distribution to label unknowns as the dominant format (with a flag).
+    """
+    if not gen_log:
+        return None
+    fmt_counts = gen_log.get("format_counts", {})
+    if not fmt_counts:
+        return None
+    # Return the most common format
+    return max(fmt_counts, key=fmt_counts.get)
+
+
 def build_dataframe(all_data):
     """Convert per-image results into a single pandas DataFrame."""
     rows = []
     for model, data in all_data.items():
+        # Build format lookup from generation log entries
+        format_lookup = {}
+        if data["gen_log"]:
+            for entry in data["gen_log"].get("entries", []):
+                iid = entry.get("image_id")
+                fmt = entry.get("format_detected")
+                if iid and fmt and fmt != "unknown":
+                    format_lookup[iid] = fmt
+
+        dominant_fmt = _infer_dominant_format(data["gen_log"])
+
         for item in data["eval"]["per_image"]:
+            iid = item["image_id"]
+            # Resolve code_language: try eval data → log entries → dominant format
+            lang = item.get("code_language", "unknown")
+            if lang == "unknown" and iid in format_lookup:
+                lang = format_lookup[iid]
+            if lang == "unknown" and dominant_fmt:
+                lang = dominant_fmt
+
             row = {
                 "model": model,
                 "model_name": MODEL_NAMES.get(model, model),
-                "image_id": item["image_id"],
+                "image_id": iid,
                 "category": item.get("category", "unknown"),
-                "code_language": item.get("code_language", "unknown"),
+                "code_language": lang,
             }
             for mk, _, _ in METRICS:
                 row[mk] = item.get(mk)
@@ -158,8 +193,8 @@ def tab1_leaderboard(df, common_df, gen_stats, paper_dir):
         for model in models_present:
             mdf = data[data["model"] == model]
             gs = gen_stats.get(model, {})
-            total = gs.get("success", 0) + gs.get("compile_error", 0) + gs.get("api_error", 0)
-            success = gs.get("success", 0)
+            total = gs.get("success", 0) + gs.get("cached", 0) + gs.get("compile_error", 0) + gs.get("api_error", 0)
+            success = gs.get("success", 0) + gs.get("cached", 0)
             rate = success / total * 100 if total > 0 else 0
 
             row = {"model": MODEL_NAMES[model], "n": len(mdf), "compile_rate": rate}
@@ -290,7 +325,8 @@ def fig2_compile_rates(gen_stats, paper_dir):
     models_present = [m for m in MODEL_ORDER if m in gen_stats]
     names = [MODEL_NAMES[m] for m in models_present]
 
-    success = [gen_stats[m].get("success", 0) for m in models_present]
+    # Count cached as success (they were generated successfully in a prior run)
+    success = [gen_stats[m].get("success", 0) + gen_stats[m].get("cached", 0) for m in models_present]
     compile_err = [gen_stats[m].get("compile_error", 0) for m in models_present]
     api_err = [gen_stats[m].get("api_error", 0) for m in models_present]
 
@@ -753,8 +789,8 @@ def export_data(df, common_df, gen_stats, paper_dir):
         summary[model] = {
             "display_name": MODEL_NAMES.get(model, model),
             "total_prompts": total,
-            "compiled": gs.get("success", 0),
-            "compile_rate": gs.get("success", 0) / total if total > 0 else 0,
+            "compiled": gs.get("success", 0) + gs.get("cached", 0),
+            "compile_rate": (gs.get("success", 0) + gs.get("cached", 0)) / total if total > 0 else 0,
             "evaluated": len(mdf),
         }
         for mk, _, _ in METRICS:
