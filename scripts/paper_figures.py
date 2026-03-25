@@ -330,7 +330,7 @@ def fig2_compile_rates(gen_stats, paper_dir):
     compile_err = [gen_stats[m].get("compile_error", 0) for m in models_present]
     api_err = [gen_stats[m].get("api_error", 0) for m in models_present]
 
-    fig, ax = plt.subplots(figsize=(7.0, 3.0))
+    fig, ax = plt.subplots(figsize=(7.0, 3.5))
     x = np.arange(len(names))
     w = 0.6
 
@@ -339,17 +339,18 @@ def fig2_compile_rates(gen_stats, paper_dir):
     ax.bar(x, api_err, w, bottom=[s + c for s, c in zip(success, compile_err)],
            label="API Error", color="#95a5a6")
 
-    # Annotate compile rate
+    # Annotate compile rate inside the bars (top of success section)
     for i, m in enumerate(models_present):
         total = success[i] + compile_err[i] + api_err[i]
         rate = success[i] / total * 100 if total > 0 else 0
-        ax.text(i, total + 20, f"{rate:.0f}%", ha="center", va="bottom", fontsize=8, fontweight="bold")
+        ax.text(i, success[i] / 2, f"{rate:.0f}%", ha="center", va="center",
+                fontsize=8, fontweight="bold", color="white")
 
     ax.set_xticks(x)
     ax.set_xticklabels(names, rotation=45, ha="right", fontsize=8)
     ax.set_ylabel("Prompts")
     ax.legend(loc="upper right", fontsize=8)
-    ax.set_title("Generation Success Rates")
+    ax.set_title("Generation Success Rates", pad=12)
 
     plt.tight_layout()
     out = os.path.join(paper_dir, "figures", "fig2_compile_rates.pdf")
