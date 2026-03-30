@@ -53,19 +53,22 @@ def safe_stat(values):
 def main():
     parser = argparse.ArgumentParser(description="Cross-model comparison report")
     parser.add_argument("--models", nargs="+", default=None,
-                        help="Models to compare (default: all found in outputs/)")
+                        help="Models to compare (default: all found in results-dir)")
+    parser.add_argument("--results-dir", default="outputs-gcp",
+                        help="Directory containing model output folders")
     parser.add_argument("--output", default="outputs/comparison_report.html")
     args = parser.parse_args()
 
     # Discover models
+    results_dir = args.results_dir
     if args.models:
         models = args.models
     else:
-        models = sorted(d for d in os.listdir("outputs")
-                        if os.path.isfile(os.path.join("outputs", d, "eval_results.json")))
+        models = sorted(d for d in os.listdir(results_dir)
+                        if os.path.isfile(os.path.join(results_dir, d, "eval_results.json")))
 
     if not models:
-        print("No model results found in outputs/")
+        print(f"No model results found in {results_dir}/")
         return
 
     print(f"Comparing {len(models)} models: {', '.join(models)}")
@@ -73,7 +76,7 @@ def main():
     # Load all results
     all_results = {}
     for model in models:
-        data = load_model_results(os.path.join("outputs", model))
+        data = load_model_results(os.path.join(results_dir, model))
         if data:
             all_results[model] = data
         else:

@@ -10,7 +10,9 @@ set -uo pipefail
 
 WORKERS=${WORKERS:-15}
 
-ALL_MODELS="deepseek-v3 deepseek-r1 gpt-5.4 gpt-oss claude-opus-4.6 gemini-3.1-pro qwen3.5-397b qwen3.5-35b llama-4-maverick"
+ALL_MODELS="deepseek-v3 deepseek-r1 gpt-5.4 gpt-oss claude-opus-4.6 gemini-3.1-pro qwen3.5-35b llama-4-maverick kimi-k2.5 nano-banana-2 nano-banana-pro"
+# Image-gen models need fewer workers to avoid burning through credits faster than auto-topup
+IMAGE_GEN_MODELS="nano-banana-2 nano-banana-pro"
 MODELS_TO_RUN=${MODELS:-$ALL_MODELS}
 
 echo "============================================"
@@ -35,7 +37,13 @@ for MODEL in $MODELS_TO_RUN; do
     # --- Phase 1: Generation ---
     echo "=== [1/3] Generation ===" | tee -a "$LOGFILE"
     START=$(date +%s)
-    if ! python scripts/generate.py --model "$MODEL" --workers "$WORKERS" 2>&1 | tee -a "$LOGFILE"; then
+    # Use fewer workers for image-gen models to avoid credit exhaustion
+    MODEL_WORKERS=$WORKERS
+    if echo "$IMAGE_GEN_MODELS" | grep -qw "$MODEL"; then
+        MODEL_WORKERS=5
+        echo "Using $MODEL_WORKERS workers (image-gen model)" | tee -a "$LOGFILE"
+    fi
+    if ! python scripts/generate.py --model "$MODEL" --workers "$MODEL_WORKERS" 2>&1 | tee -a "$LOGFILE"; then
         echo "WARNING: Generation failed for $MODEL, skipping to next model" | tee -a "$LOGFILE"
         continue
     fi

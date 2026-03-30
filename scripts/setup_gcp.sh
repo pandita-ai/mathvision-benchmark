@@ -45,5 +45,5 @@ echo '  export DEEPSEEK_API_KEY=$(curl -s "http://metadata.google.internal/compu
 echo '  export OPENAI_API_KEY=$(curl -s "http://metadata.google.internal/computeMetadata/v1/instance/attributes/OPENAI_API_KEY" -H "Metadata-Flavor: Google")'
 echo '  export OPENROUTER_API_KEY=$(curl -s "http://metadata.google.internal/computeMetadata/v1/instance/attributes/OPENROUTER_API_KEY" -H "Metadata-Flavor: Google")'
 echo '  export GROQ_API_KEY=$(curl -s "http://metadata.google.internal/computeMetadata/v1/instance/attributes/GROQ_API_KEY" -H "Metadata-Flavor: Google")'
-echo '  bash scripts/run_experiment.sh                              # all 9 models'
-echo '  MODELS="deepseek-v3 gpt-5.2-thinking" bash scripts/run_experiment.sh  # specific models'
+echo '  bash scripts/run_experiment.sh                              # all 11 models'
+echo '  MODELS="deepseek-v3 gpt-5.4" bash scripts/run_experiment.sh  # specific models'

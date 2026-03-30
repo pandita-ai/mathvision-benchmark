@@ -4,11 +4,12 @@ generate.py — Generate diagram images from concise prompts using LLM APIs.
 For code-generating LLMs: prompt → code response → detect format → compile → PNG
 For image-generating models: prompt → image directly → PNG
 
-Models: DeepSeek-V3, DeepSeek-R1, GPT-5.2 Thinking, o3-mini, Claude Opus 4.6,
-Gemini 3.1 Pro, Qwen3.5-397B, Qwen3.5-35B, Llama 4 Maverick
+Models: DeepSeek-V3, DeepSeek-R1, GPT-5.4, GPT-OSS-120B, Claude Opus 4.6,
+Gemini 3.1 Pro, Qwen3.5-35B, Llama 4 Maverick, Kimi K2.5, Nano Banana 2, Nano Banana Pro
 """
 
 import argparse
+import base64
 import csv
 import hashlib
 import json
@@ -17,9 +18,9 @@ import re
 import subprocess
 import sys
 import tempfile
-import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from io import BytesIO
 from pathlib import Path
 
 from openai import OpenAI
@@ -97,6 +98,28 @@ MODELS = {
         "type": "code_llm",
         "provider": "openrouter",
         "model_id": "meta-llama/llama-4-maverick",
+        "base_url": "https://openrouter.ai/api/v1",
+        "env_key": "OPENROUTER_API_KEY",
+    },
+    "kimi-k2.5": {
+        "type": "code_llm",
+        "provider": "openrouter",
+        "model_id": "moonshotai/kimi-k2.5",
+        "base_url": "https://openrouter.ai/api/v1",
+        "env_key": "OPENROUTER_API_KEY",
+    },
+    # --- Image generation models (OpenRouter) ---
+    "nano-banana-2": {
+        "type": "image_gen",
+        "provider": "openrouter",
+        "model_id": "google/gemini-3.1-flash-image-preview",
+        "base_url": "https://openrouter.ai/api/v1",
+        "env_key": "OPENROUTER_API_KEY",
+    },
+    "nano-banana-pro": {
+        "type": "image_gen",
+        "provider": "openrouter",
+        "model_id": "google/gemini-3-pro-image-preview",
         "base_url": "https://openrouter.ai/api/v1",
         "env_key": "OPENROUTER_API_KEY",
     },
@@ -355,9 +378,12 @@ def get_client(model_cfg: dict) -> OpenAI:
     if not api_key:
         raise ValueError(f"Set {model_cfg['env_key']} environment variable")
 
+    # Image-gen models need longer timeouts for generation
+    timeout = 180 if model_cfg.get("type") == "image_gen" else 60
     return OpenAI(
         api_key=api_key,
         base_url=model_cfg["base_url"],
+        timeout=timeout,
     )
 
 
@@ -388,14 +414,61 @@ def generate_code(client: OpenAI, model_cfg: dict, prompt: str) -> str:
     return result or ""
 
 
+def generate_image(client: OpenAI, model_cfg: dict, prompt: str) -> bytes:
+    """Send prompt to image-gen model and get image bytes back."""
+    response = client.chat.completions.create(
+        model=model_cfg["model_id"],
+        messages=[
+            {"role": "user", "content": f"Generate a precise mathematical diagram: {prompt}"},
+        ],
+        extra_body={"modalities": ["image"]},
+    )
+    msg = response.choices[0].message
+    # OpenRouter returns base64 image in content parts or images field
+    # Try multiple response formats
+    image_data = None
+
+    # Format 1: msg.images[0].image_url.url (OpenRouter native)
+    images = getattr(msg, "images", None)
+    if images:
+        try:
+            img_obj = images[0]
+            if hasattr(img_obj, "image_url"):
+                url = img_obj.image_url.url if hasattr(img_obj.image_url, "url") else ""
+            elif isinstance(img_obj, dict):
+                url = img_obj.get("image_url", {}).get("url", "")
+            else:
+                url = ""
+            if url and "base64," in url:
+                image_data = url.split("base64,", 1)[1]
+        except (AttributeError, TypeError, IndexError):
+            pass
+
+    # Format 2: content is a list with image parts
+    if not image_data and isinstance(msg.content, list):
+        for part in msg.content:
+            try:
+                if hasattr(part, "type") and part.type == "image_url":
+                    url = part.image_url.url if hasattr(part.image_url, "url") else ""
+                    if "base64," in url:
+                        image_data = url.split("base64,", 1)[1]
+                        break
+            except (AttributeError, TypeError):
+                continue
+
+    # Format 3: content is a single base64 data URL string
+    if not image_data and isinstance(msg.content, str) and "base64," in msg.content:
+        image_data = msg.content.split("base64,", 1)[1]
+
+    if not image_data:
+        raise ValueError(f"No image found in response. Content type: {type(msg.content)}")
+
+    return base64.b64decode(image_data)
+
+
 # ---------------------------------------------------------------------------
 # Main pipeline
 # ---------------------------------------------------------------------------
-
-# Thread-safe collections for parallel execution
-_logs_lock = threading.Lock()
-_stats_lock = threading.Lock()
-
 
 def process_prompt(client, model_cfg, image_id, prompt, output_dir):
     """Process a single prompt: generate code → detect format → compile → save PNG.
@@ -413,17 +486,46 @@ def process_prompt(client, model_cfg, image_id, prompt, output_dir):
         except Exception:
             os.remove(img_path)  # corrupt PNG, regenerate
 
-    # Step 1: Get code from LLM (with retry for transient errors)
+    # Branch based on model type
+    if model_cfg.get("type") == "image_gen":
+        # Image generation pathway: API → binary image → save PNG directly
+        for attempt in range(5):
+            try:
+                image_bytes = generate_image(client, model_cfg, prompt)
+                img = Image.open(BytesIO(image_bytes))
+                img.save(img_path, "PNG")
+                log_entry = {
+                    "image_id": image_id,
+                    "format_detected": "image_gen",
+                    "status": "success",
+                }
+                return log_entry, "success", "image_gen"
+            except Exception as e:
+                err = str(e)
+                retryable = "429" in err or "500" in err or "502" in err or "503" in err or "timeout" in err.lower()
+                credit_error = "402" in err or "Insufficient credits" in err
+                if attempt < 4 and (retryable or credit_error):
+                    wait = 30 if credit_error else 2 ** attempt
+                    time.sleep(wait)
+                    continue
+                return {"image_id": image_id, "error": err}, "api_error", None
+        return {"image_id": image_id, "error": "All retries failed"}, "api_error", None
+
+    # Code generation pathway: API → code → extract → compile → PNG
     raw_response = None
-    for attempt in range(3):
+    for attempt in range(5):
         try:
             raw_response = generate_code(client, model_cfg, prompt)
             break
         except Exception as e:
-            if attempt < 2 and ("429" in str(e) or "500" in str(e) or "502" in str(e) or "503" in str(e) or "timeout" in str(e).lower()):
-                time.sleep(2 ** attempt)
+            err = str(e)
+            retryable = "429" in err or "500" in err or "502" in err or "503" in err or "timeout" in err.lower()
+            credit_error = "402" in err or "Insufficient credits" in err
+            if attempt < 4 and (retryable or credit_error):
+                wait = 30 if credit_error else 2 ** attempt
+                time.sleep(wait)
                 continue
-            return {"image_id": image_id, "error": str(e)}, "api_error", None
+            return {"image_id": image_id, "error": err}, "api_error", None
 
     if raw_response is None:
         return {"image_id": image_id, "error": "All retries failed"}, "api_error", None

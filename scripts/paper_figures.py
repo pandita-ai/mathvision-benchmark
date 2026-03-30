@@ -39,6 +39,9 @@ MODEL_NAMES = {
     "gemini-3.1-pro": "Gemini 3.1 Pro",
     "qwen3.5-35b": "Qwen3.5-35B",
     "llama-4-maverick": "Llama 4 Maverick",
+    "kimi-k2.5": "Kimi K2.5",
+    "nano-banana-2": "Nano Banana 2",
+    "nano-banana-pro": "Nano Banana Pro",
 }
 
 MODEL_ORDER = list(MODEL_NAMES.keys())
