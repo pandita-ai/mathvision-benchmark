@@ -647,8 +647,8 @@ def fig9_radar(df, gen_stats, paper_dir):
     for model in models_present:
         mdf = df[df["model"] == model]
         gs = gen_stats.get(model, {})
-        total = gs.get("success", 0) + gs.get("compile_error", 0) + gs.get("api_error", 0)
-        cr = gs.get("success", 0) / total if total > 0 else 0
+        total = gs.get("success", 0) + gs.get("cached", 0) + gs.get("compile_error", 0) + gs.get("api_error", 0)
+        cr = (gs.get("success", 0) + gs.get("cached", 0)) / total if total > 0 else 0
 
         radar_data[model] = {
             "Compile Rate": cr,
@@ -748,8 +748,8 @@ def fig11_scatter(df, gen_stats, paper_dir):
 
     for model in models_present:
         gs = gen_stats[model]
-        total = gs.get("success", 0) + gs.get("compile_error", 0) + gs.get("api_error", 0)
-        cr = gs.get("success", 0) / total * 100 if total > 0 else 0
+        total = gs.get("success", 0) + gs.get("cached", 0) + gs.get("compile_error", 0) + gs.get("api_error", 0)
+        cr = (gs.get("success", 0) + gs.get("cached", 0)) / total * 100 if total > 0 else 0
         clip_mean = df[df["model"] == model]["clip_sim"].mean()
 
         ax.scatter(cr, clip_mean, s=80, color=MODEL_COLORS[model], zorder=5, edgecolors="white", linewidths=0.5)
@@ -788,7 +788,7 @@ def export_data(df, common_df, gen_stats, paper_dir):
     for model in df["model"].unique():
         mdf = df[df["model"] == model]
         gs = gen_stats.get(model, {})
-        total = gs.get("success", 0) + gs.get("compile_error", 0) + gs.get("api_error", 0)
+        total = gs.get("success", 0) + gs.get("compile_error", 0) + gs.get("api_error", 0) + gs.get("cached", 0)
 
         summary[model] = {
             "display_name": MODEL_NAMES.get(model, model),

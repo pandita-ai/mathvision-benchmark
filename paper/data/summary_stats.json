@@ -1,9 +1,9 @@
 {
   "deepseek-v3": {
     "display_name": "DeepSeek V3",
-    "total_prompts": 257,
+    "total_prompts": 2920,
     "compiled": 2676,
-    "compile_rate": 10.412451361867705,
+    "compile_rate": 0.9164383561643835,
     "evaluated": 2772,
     "dists": {
       "mean": 0.2725290334198898,
@@ -32,9 +32,9 @@
   },
   "deepseek-r1": {
     "display_name": "DeepSeek R1",
-    "total_prompts": 530,
+    "total_prompts": 2920,
     "compiled": 2722,
-    "compile_rate": 5.1358490566037736,
+    "compile_rate": 0.9321917808219178,
     "evaluated": 2808,
     "dists": {
       "mean": 0.2779204734200426,
@@ -94,9 +94,9 @@
   },
   "gpt-oss": {
     "display_name": "GPT-OSS-120B",
-    "total_prompts": 930,
+    "total_prompts": 2920,
     "compiled": 2508,
-    "compile_rate": 2.696774193548387,
+    "compile_rate": 0.8589041095890411,
     "evaluated": 2582,
     "dists": {
       "mean": 0.27186789178368104,
@@ -125,9 +125,9 @@
   },
   "claude-opus-4.6": {
     "display_name": "Claude Opus 4.6",
-    "total_prompts": 545,
+    "total_prompts": 2920,
     "compiled": 2601,
-    "compile_rate": 4.772477064220183,
+    "compile_rate": 0.8907534246575343,
     "evaluated": 2690,
     "dists": {
       "mean": 0.2629114272647631,
@@ -156,9 +156,9 @@
   },
   "gemini-3.1-pro": {
     "display_name": "Gemini 3.1 Pro",
-    "total_prompts": 2716,
+    "total_prompts": 2920,
     "compiled": 2064,
-    "compile_rate": 0.759941089837997,
+    "compile_rate": 0.7068493150684931,
     "evaluated": 2083,
     "dists": {
       "mean": 0.27213666771560463,
@@ -280,9 +280,9 @@
   },
   "nano-banana-2": {
     "display_name": "Nano Banana 2",
-    "total_prompts": 11,
+    "total_prompts": 2920,
     "compiled": 2920,
-    "compile_rate": 265.45454545454544,
+    "compile_rate": 1.0,
     "evaluated": 2920,
     "dists": {
       "mean": 0.2844786730122893,
@@ -311,9 +311,9 @@
   },
   "nano-banana-pro": {
     "display_name": "Nano Banana Pro",
-    "total_prompts": 1923,
+    "total_prompts": 2920,
     "compiled": 2908,
-    "compile_rate": 1.5122204888195527,
+    "compile_rate": 0.9958904109589041,
     "evaluated": 2908,
     "dists": {
       "mean": 0.2831118966682085,
