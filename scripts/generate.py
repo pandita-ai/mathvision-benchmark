@@ -79,13 +79,6 @@ MODELS = {
         "base_url": "https://openrouter.ai/api/v1",
         "env_key": "OPENROUTER_API_KEY",
     },
-    "qwen3.5-397b": {
-        "type": "code_llm",
-        "provider": "openrouter",
-        "model_id": "qwen/qwen3.5-397b-a17b",
-        "base_url": "https://openrouter.ai/api/v1",
-        "env_key": "OPENROUTER_API_KEY",
-    },
     "qwen3.5-35b": {
         "type": "code_llm",
         "provider": "openrouter",
